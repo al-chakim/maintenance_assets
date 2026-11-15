@@ -10,6 +10,8 @@ public class AssetResponse {
     private String assetCode;
     private String name;
     private Long categoryId;
+    private String categoryByName;
+    private Long createdBy;
     private String createdByName;
     private String description;
     private String location;
@@ -56,12 +58,30 @@ public class AssetResponse {
         this.categoryId = categoryId;
     }
 
-    // created b name
+    // category by name
     public String getCategoryByName() {
+        return categoryByName;
+    }
+
+    public void setCategoryByName(String categoryByName) {
+        this.categoryByName = categoryByName;
+    }
+
+    // created by id
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    // created by name
+    public String getCreatedByName() {
         return createdByName;
     }
 
-    public void setCategoryByName(String createdByName) {
+    public void setCreatedByName(String createdByName) {
         this.createdByName = createdByName;
     }
 
