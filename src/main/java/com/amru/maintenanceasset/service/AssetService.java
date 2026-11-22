@@ -139,6 +139,7 @@ public class AssetService {
     }
 
     // method update asset
+    @Transactional
     public AssetResponse updateAsset(Long id, AssetRequest request) {
 
         // 1. check whether asset exists
