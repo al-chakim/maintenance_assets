@@ -4,6 +4,7 @@ import com.amru.maintenanceasset.dto.AssetRequest;
 import com.amru.maintenanceasset.dto.AssetResponse;
 import com.amru.maintenanceasset.entity.Asset;
 import com.amru.maintenanceasset.entity.AssetCategory;
+import com.amru.maintenanceasset.entity.AssetStatus;
 import com.amru.maintenanceasset.entity.User;
 import com.amru.maintenanceasset.exception.BusinessRuleException;
 import com.amru.maintenanceasset.exception.ResourceNotFoundException;
@@ -92,13 +93,22 @@ public class AssetService {
 
         }
 
-        // search user by id
+        // 4. search user by id
         User user = userRepository.findById(request.getCreatedBy());
 
         if (user == null) {
 
             throw new ResourceNotFoundException(
                     "User with id " + request.getCreatedBy() + " not found"
+            );
+
+        }
+
+        // 5. check user inactive
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+
+            throw new BusinessRuleException(
+                    "Cannot assign an inactive user as asset creator"
             );
 
         }
@@ -111,6 +121,9 @@ public class AssetService {
             );
 
         }
+
+        // (6). call validation status
+        validateAssetStatus(request.getStatus());
 
         // 7. create asset entity
         Asset asset = new Asset();
@@ -184,6 +197,9 @@ public class AssetService {
 
         }
 
+        // (4). call validation status
+        validateAssetStatus(request.getStatus());
+
         // 5. update asset data
         asset.setAssetCode(request.getAssetCode().trim());
         asset.setName(request.getName().trim());
@@ -227,6 +243,17 @@ public class AssetService {
 
         return response;
 
+    }
+
+    // validation asset status
+    private void validateAssetStatus(String status) {
+        try {
+            AssetStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new BusinessRuleException(
+                    "Invalid asset status. Allowed values: AVAILABLE, IN_USE, UNDER_MAINTENANCE, DAMAGE, RETIRED"
+            );
+        }
     }
 
 }
