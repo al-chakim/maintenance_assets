@@ -128,15 +128,15 @@ public class AssetService {
         // 7. create asset entity
         Asset asset = new Asset();
 
-        asset.setAssetCode(request.getAssetCode());
-        asset.setName(request.getName());
+        asset.setAssetCode(request.getAssetCode().trim());
+        asset.setName(request.getName().trim());
         asset.setCategory(category);
         asset.setCreatedBy(user);
         asset.setDescription(request.getDescription());
         asset.setLocation(request.getLocation());
         asset.setPurchaseDate(request.getPurchaseDate());
         asset.setPurchasePrice(request.getPurchasePrice());
-        asset.setStatus(request.getStatus().trim());
+        asset.setStatus(request.getStatus().trim().toUpperCase());
 
         // 8. fill timestamp
         OffsetDateTime now = OffsetDateTime.now();
@@ -208,7 +208,7 @@ public class AssetService {
         asset.setLocation(request.getLocation());
         asset.setPurchaseDate(request.getPurchaseDate());
         asset.setPurchasePrice(request.getPurchasePrice());
-        asset.setStatus(request.getStatus().trim());
+        asset.setStatus(request.getStatus().trim().toUpperCase());
         asset.setUpdatedAt(OffsetDateTime.now());
 
         // createdBy is intentionally not changed during update
