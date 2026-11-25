@@ -7,6 +7,7 @@ import com.amru.maintenanceasset.exception.BusinessRuleException;
 import com.amru.maintenanceasset.exception.DuplicateAssetCategoryException;
 import com.amru.maintenanceasset.exception.ResourceNotFoundException;
 import com.amru.maintenanceasset.repository.AssetCategoryRepository;
+import com.amru.maintenanceasset.repository.AssetRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,6 +21,9 @@ public class AssetCategoryService {
 
     @Inject
     AssetCategoryRepository assetCategoryRepository;
+
+    @Inject
+    AssetRepository assetRepository;
 
     // get all data
     @Transactional
@@ -155,11 +159,22 @@ public class AssetCategoryService {
         // 2.check whether category is already inactive
         if (!category.getActive()) {
             throw new BusinessRuleException(
-                    "Assets category is alraady inactive"
+                    "Assets category is already inactive"
             );
         }
 
-        // 3. deactivate category
+        // 3. check whether category is being user by assets
+        long totalAssets = assetRepository.countCategoryId(id);
+
+        if (totalAssets > 0 ) {
+
+            throw new BusinessRuleException(
+                    "Cannot deactivate asset category because it is currently used by " + totalAssets + " asset(s)"
+            );
+
+        }
+
+        // 4. deactivate category
         category.setActive(false);
         category.setUpdatedAt(OffsetDateTime.now());
 
