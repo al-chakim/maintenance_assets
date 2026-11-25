@@ -217,6 +217,48 @@ public class AssetService {
 
     }
 
+    // method search
+    @Transactional
+    public List<AssetResponse> searchAssets(
+            String status,
+            Long categoryId,
+            String keyword
+    ) {
+
+        // validate status if provided
+        if (status != null && !status.isBlank()) {
+
+            validateAssetStatus(status);
+            status = status.trim().toUpperCase();
+
+        }
+
+        // validate category if provided
+        if (categoryId != null) {
+
+            AssetCategory category = assetCategoryRepository.findById(categoryId);
+
+            if (category == null) {
+
+                throw new ResourceNotFoundException(
+                        "Asset category with id " + categoryId + " not found"
+                );
+
+            }
+
+        }
+
+        // search assets from repository
+        return assetRepository.searchAssets(
+                status,
+                categoryId,
+                keyword
+        ).stream()
+                .map(this::mapToResponse)
+                .toList();
+
+    }
+
     // mapper
     private AssetResponse mapToResponse(Asset asset) {
 

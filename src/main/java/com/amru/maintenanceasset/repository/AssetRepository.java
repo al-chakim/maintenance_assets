@@ -4,6 +4,9 @@ import com.amru.maintenanceasset.entity.Asset;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.List;
 
 @ApplicationScoped
@@ -27,6 +30,47 @@ public class AssetRepository implements PanacheRepository<Asset> {
     public long countCategoryId(Long categoryId) {
 
         return count("category.id", categoryId);
+
+    }
+
+    // search data asset by parameter
+    public List<Asset> searchAssets(
+            String status,
+            Long categoryId,
+            String keyword
+    ) {
+
+        StringBuilder query = new StringBuilder("1 = 1");
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        if (status != null && !status.isBlank()) {
+
+            query.append(" and lower(status) = lower(:status)");
+            parameters.put("status", status.trim());
+
+        }
+
+        if (categoryId != null) {
+            query.append(" and category.id = :categoryId");
+            parameters.put("categoryId", categoryId);
+        }
+
+        if (keyword != null && !keyword.isBlank()) {
+
+            query.append(
+                    " and (lower(name) like lower(:keyword) " +
+                            "or lower(assetCode) like lower(:keyword))"
+            );
+
+            parameters.put(
+                    "keyword",
+                    "%" + keyword.trim() + "%"
+            );
+
+        }
+
+        return find(query.toString(), parameters).list();
 
     }
 
