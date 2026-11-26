@@ -217,7 +217,7 @@ public class AssetService {
 
     }
 
-    // method search
+    // method search asset
     @Transactional
     public List<AssetResponse> searchAssets(
             String status,
