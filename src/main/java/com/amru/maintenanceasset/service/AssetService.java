@@ -2,6 +2,7 @@ package com.amru.maintenanceasset.service;
 
 import com.amru.maintenanceasset.dto.AssetRequest;
 import com.amru.maintenanceasset.dto.AssetResponse;
+import com.amru.maintenanceasset.dto.AssetPageResponse;
 import com.amru.maintenanceasset.entity.Asset;
 import com.amru.maintenanceasset.entity.AssetCategory;
 import com.amru.maintenanceasset.entity.AssetStatus;
@@ -15,9 +16,11 @@ import com.amru.maintenanceasset.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 @ApplicationScoped
 public class AssetService {
@@ -217,15 +220,19 @@ public class AssetService {
 
     }
 
-    // method search asset
+    // method search asset with pagination and sorting
     @Transactional
-    public List<AssetResponse> searchAssets(
+    public AssetPageResponse searchAssets(
             String status,
             Long categoryId,
-            String keyword
+            String keyword,
+            int page,
+            int size,
+            String sortBy,
+            String direction
     ) {
 
-        // validate status if provided
+        // 1. validate status if provided
         if (status != null && !status.isBlank()) {
 
             validateAssetStatus(status);
@@ -233,7 +240,7 @@ public class AssetService {
 
         }
 
-        // validate category if provided
+        // 2. validate category if provided
         if (categoryId != null) {
 
             AssetCategory category = assetCategoryRepository.findById(categoryId);
@@ -248,14 +255,90 @@ public class AssetService {
 
         }
 
-        // search assets from repository
-        return assetRepository.searchAssets(
+        // 3. validate pagination
+        if (page < 0) {
+
+            throw new BadRequestException(
+                    "Page must be greater than or equal to zero"
+            );
+
+        }
+
+        if (size < 1 || size > 100) {
+
+            throw new BadRequestException(
+                    "Page size must be between 1 and 100"
+            );
+
+        }
+
+        // 4. validate sorting column
+        Set<String> allowedSortFields = Set.of(
+                "assetCode",
+                "name",
+                "status",
+                "createdAt",
+                "purchaseDate",
+                "purchasePrice",
+                "location"
+        );
+
+        if (!allowedSortFields.contains(sortBy)) {
+
+            throw new BadRequestException(
+                    "Invalid sortB field: " + sortBy
+            );
+
+        }
+
+        // 5. validate sorting direction
+        if (!"asc".equalsIgnoreCase(direction) && !"desc".equalsIgnoreCase(direction)) {
+
+            throw new BadRequestException(
+                    "Direction must be either asc or desc"
+            );
+
+        }
+
+        // 6. normalize sorting direction
+        direction = direction.toLowerCase();
+
+        // 7. get pagination assets
+        List<Asset> assets = assetRepository.searchAssets(
+                status,
+                categoryId,
+                keyword,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        // 8. count all matching assets
+        long totalItems = assetRepository.countSearchAssets(
                 status,
                 categoryId,
                 keyword
-        ).stream()
+        );
+
+        // 9. calculate total pages
+        int totalPages = (int) Math.ceil(
+                (double) totalItems / size
+        );
+
+        // 10. map entities to response DTO
+        List<AssetResponse> data = assets.stream()
                 .map(this::mapToResponse)
                 .toList();
+
+        // 11. return pagination response
+        return new AssetPageResponse(
+                data,
+                page,
+                size,
+                totalItems,
+                totalPages
+        );
 
     }
 
