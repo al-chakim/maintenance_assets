@@ -131,7 +131,7 @@ public class AssetRepository implements PanacheRepository<Asset> {
 
             query.append(
                     " and (lower(name) like lower(:keyword)" +
-                            " or lower(assetCode) like lower(:keyword)"
+                            " or lower(assetCode) like lower(:keyword))"
             );
 
             parameters.put("keyword", "%" + keyword.trim() + "%");

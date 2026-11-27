@@ -2,6 +2,7 @@ package com.amru.maintenanceasset.resource;
 
 import com.amru.maintenanceasset.dto.AssetRequest;
 import com.amru.maintenanceasset.dto.AssetResponse;
+import com.amru.maintenanceasset.dto.AssetPageResponse;
 import com.amru.maintenanceasset.service.AssetService;
 
 import jakarta.inject.Inject;
@@ -22,10 +23,14 @@ public class AssetResource {
 
     // get all assets
     @GET
-    public List<AssetResponse> getAllAssets(
+    public AssetPageResponse getAllAssets(
             @QueryParam("status") String status,
             @QueryParam("categoryId") String categoryId,
-            @QueryParam("keyword") String keyword
+            @QueryParam("keyword") String keyword,
+            @DefaultValue("0") @QueryParam("page") int page,
+            @DefaultValue("10") @QueryParam("size") int size,
+            @DefaultValue("name") @QueryParam("sortBy") String sortBy,
+            @DefaultValue("asc") @QueryParam("direction") String direction
     ) {
 
         Long parsedCategoryId = parseCategoryId(categoryId);
@@ -33,7 +38,11 @@ public class AssetResource {
         return assetService.searchAssets(
                 status,
                 parsedCategoryId,
-                keyword
+                keyword,
+                page,
+                size,
+                sortBy,
+                direction
         );
 
     }

@@ -286,7 +286,7 @@ public class AssetService {
         if (!allowedSortFields.contains(sortBy)) {
 
             throw new BadRequestException(
-                    "Invalid sortB field: " + sortBy
+                    "Invalid sortBy field: " + sortBy
             );
 
         }
