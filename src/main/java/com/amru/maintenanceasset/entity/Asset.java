@@ -36,7 +36,7 @@ public class Asset {
     @Column(name = "purchase_date")
     private LocalDate purchaseDate;
 
-    @Column(name = "purchase_price", precision = 15,scale = 2)
+    @Column(name = "purchase_price", precision = 15, scale = 2)
     private BigDecimal purchasePrice;
 
     @Column(nullable = false, length = 30)
